@@ -18,8 +18,8 @@ description = {
 }
 
 dependencies = {
-   "lua >= 5.1"
-   -- If you depend on other rocks, add them here
+   "lua >= 5.1",
+   "sys"
 }
 
 build = {
