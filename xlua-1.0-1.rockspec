@@ -1,17 +1,17 @@
 
-package = "sys"
+package = "xlua"
 version = "1.0-1"
 
 source = {
-   url = "sys-1.0-1.tgz"
+   url = "xlua-1.0-1.tgz"
 }
 
 description = {
-   summary = "Provides a set of standard unixy tools",
+   summary = "Provides a couple of functions to make the Lua shell better",
    detailed = [[
-         This package provides a set of standard unix
-         tools, from file operators, to system clocks
-         and so on.
+         + provides a better print() that goes through tables
+         + provides clearall()/clear(var)/who() methods, a la Matlab
+         + provides a simple progress bar to be happier when dealing with for loops :-)
    ]],
    homepage = "",
    license = "MIT/X11" -- or whatever you like
@@ -26,12 +26,6 @@ build = {
    type = "builtin",
 
    modules = {
-      sys = "sys.lua",
-      libsys = {
-         sources = {"sys.c"}
-         --libraries = {"date"},
-         --incdirs = {"$(LIBDATE_INCDIR)"},
-         --libdirs = {"$(LIBDATE_LIBDIR)"}
-      }
+      xlua = "xlua.lua",
    }
 }
