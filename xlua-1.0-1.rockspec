@@ -12,6 +12,7 @@ description = {
          + provides a better print() that goes through tables
          + provides clearall()/clear(var)/who() methods, a la Matlab
          + provides a simple progress bar to be happier when dealing with for loops :-)
+         + provides a set of methods to auto handle named/ordered arguments
    ]],
    homepage = "",
    license = "MIT/X11" -- or whatever you like

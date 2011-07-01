@@ -24,10 +24,11 @@
 ----------------------------------------------------------------------
 -- description:
 --     xlua - a package that provides a better Lua prompt, and a few
---            methods to deal with the namespace
+--            methods to deal with the namespace, argument unpacking
+--            and so on...
 --
 -- history: 
---     June 30, 2011, 4:54PM - creation
+--     June 30, 2011, 4:54PM - creation - Clement Farabet
 ----------------------------------------------------------------------
 
 require 'os'
@@ -55,7 +56,6 @@ module 'xlua'
 ----------------------------------------------------------------------
 -- better print function
 ----------------------------------------------------------------------
-lua_print = glob.print
 print = function(obj,...)
           if glob.type(obj) == 'table' then
               local mt = glob.getmetatable(obj)
@@ -107,6 +107,7 @@ print = function(obj,...)
               glob.io.write('\n')
            end
         end
+glob._print = glob.print
 glob.print = print
 
 ----------------------------------------------------------------------
@@ -208,5 +209,205 @@ function progress(current, goal)
       end
       -- flush
       glob.io.flush()
+   end
+end
+
+--------------------------------------------------------------------------------
+-- prints an error with nice formatting. If domain is provided, it is used as
+-- following: <domain> msg
+--------------------------------------------------------------------------------
+function error(message, domain, usage) 
+   if domain then
+      message = '<' .. domain .. '> ' .. message
+   else
+      message = 'ERROR: ' .. message
+   end
+   local c = glob.sys.COLORS
+   local col_msg = c.Red .. message .. c.none
+   if usage then
+      print(col_msg)
+      glob._error(usage)
+   else
+      glob._error(col_msg)
+   end
+end
+glob._error = glob.error
+glob.error = error
+
+--------------------------------------------------------------------------------
+-- returns true if package is installed, rather than crashing stupidly :-)
+--------------------------------------------------------------------------------
+function installed(package) 
+   local found = false
+   local p = glob.package.path .. ';' .. glob.package.cpath
+   for path in p:gfind('.-;') do
+      path = path:gsub(';',''):gsub('?',package)
+      if glob.sys.filep(path) then 
+         found = true
+         p = path
+         break
+      end
+   end
+   return found,p
+end
+function require(package) 
+   if installed(package) then
+      return glob.require(package)
+   else
+      print('warning: <' .. package .. '> could not be loaded (is it installed?)')
+      return false
+   end
+end
+glob._require = require
+
+--------------------------------------------------------------------------------
+-- standard usage function: used to display automated help for functions
+--
+-- @param funcname     function name
+-- @param description  description of the function
+-- @param example      usage example
+-- @param ...          [optional] arguments
+--------------------------------------------------------------------------------
+function usage(funcname, description, example, ...)
+   local c = COLORS
+   local str = c.magenta .. '\n'
+   local str = str .. '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
+   str = str .. 'NAME:\n' .. funcname .. '\n'
+   if description then
+      str = str .. '\nDESC:\n' .. description .. '\n'
+   end
+   if example then
+      str = str .. '\nEXAMPLE:\n' .. example .. '\n'
+   end
+   str = str .. '\nUSAGE:\n'
+
+   -- named arguments:
+   local args = {...}
+   if args[1].arg then
+      str = str .. funcname .. '{\n'
+      for i,param in ipairs{...} do
+         local key
+         if param.req then
+            key = '    ' .. param.arg .. ' = ' .. param.type
+         else
+            key = '    [' .. param.arg .. ' = ' .. param.type .. ']'
+         end
+         -- align:
+         while key:len() < 40 do
+            key = key .. ' '
+         end
+         str = str .. key .. '-- ' .. param.help 
+         if param.default or param.default == false then
+            str = str .. '  [default = ' .. tostring(param.default) .. ']'
+         elseif param.defaulta then
+            str = str .. '  [default == ' .. param.defaulta .. ']'
+         end
+         str = str.. '\n'
+      end
+      str = str .. '}\n'
+
+   -- unnamed args:
+   else
+      str = str .. funcname .. '(\n'
+      for i,param in ipairs{...} do
+         local key
+         if param.req then
+            key = '    ' .. param.type
+         else
+            key = '    [' .. param.type .. ']'
+         end
+         -- align:
+         while key:len() < 40 do
+            key = key .. ' '
+         end
+         str = str .. key .. '-- ' .. param.help .. '\n'
+      end
+      str = str .. ')\n'
+   end
+   str = str .. '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+   str = str .. c.none
+   return str
+end
+
+--------------------------------------------------------------------------------
+-- standard argument function: used to handle named arguments, and 
+-- display automated help for functions
+--------------------------------------------------------------------------------
+function unpack(args, funcname, description, ...)
+   -- look at def, autogen example
+   local defs = {...}
+   local example
+   if #defs > 1 then
+      example = funcname .. '{' .. defs[2].arg .. '=' .. defs[2].type .. ', '
+                                .. defs[1].arg .. '=' .. defs[1].type .. '}\n'
+      example = example .. funcname .. '(' .. defs[1].type .. ',' .. ' ...)'
+   end
+
+   -- generate usage string
+   local usage = usage(funcname, description, example, ...)
+
+   -- get args
+   local iargs = {}
+   if #args == 0 then error(usage)
+   elseif #args == 1 and type(args[1]) == 'table' and #args[1] == 0 then
+      -- named args
+      iargs = args[1]
+   else
+      -- ordered args
+      for i = 1,select('#',...) do
+         iargs[defs[i].arg] = args[i]
+      end
+   end
+
+   -- check/set arguments
+   local dargs = {}
+   local c = COLORS
+   for i,def in ipairs(defs) do
+      -- is value requested ?
+      if def.req and iargs[def.arg] == nil then
+         print(c.Red .. 'missing argument: ' .. def.arg .. c.none)
+         error(usage)
+      end
+      -- get value or default
+      dargs[def.arg] = iargs[def.arg]
+      if dargs[def.arg] == nil then
+         dargs[def.arg] = def.default
+      end
+      if dargs[def.arg] == nil and def.defaulta then
+         dargs[def.arg] = dargs[def.defaulta]
+      end
+      dargs[i] = dargs[def.arg]
+   end
+
+   -- return usage too
+   dargs.usage = usage
+
+   -- print doc ?
+   if _PRINT_DOC_ then
+      unpack_printdoc(dargs, funcname, description, ...)
+   end
+
+   -- return modified args
+   return dargs,
+   dargs[1], dargs[2], dargs[3], dargs[4], dargs[5], dargs[6], dargs[7], dargs[8], 
+   dargs[9], dargs[10], dargs[11], dargs[12], dargs[13], dargs[14], dargs[15], dargs[16],
+   dargs[17], dargs[18], dargs[19], dargs[20], dargs[21], dargs[22], dargs[23], dargs[24],
+   dargs[25], dargs[26], dargs[27], dargs[28], dargs[29], dargs[30], dargs[31], dargs[32],
+   dargs[33], dargs[34], dargs[35], dargs[36], dargs[37], dargs[38], dargs[39], dargs[40],
+   dargs[41], dargs[42], dargs[43], dargs[44], dargs[45], dargs[46], dargs[47], dargs[48],
+   dargs[49], dargs[50], dargs[51], dargs[52], dargs[53], dargs[54], dargs[55], dargs[56]
+end
+
+--------------------------------------------------------------------------------
+-- standard argument function for classes: used to handle named arguments, and 
+-- display automated help for functions
+-- auto inits the self with usage
+--------------------------------------------------------------------------------
+function unpack_class(object, args, funcname, description, ...)
+   local dargs = unpack(args, funcname, description, ...)
+   for k,v in pairs(dargs) do
+      if type(k) ~= 'number' then
+         object[k] = v
+      end
    end
 end
