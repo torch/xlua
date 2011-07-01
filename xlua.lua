@@ -219,20 +219,17 @@ end
 function error(message, domain, usage) 
    if domain then
       message = '<' .. domain .. '> ' .. message
-   else
-      message = 'ERROR: ' .. message
    end
    local c = glob.sys.COLORS
    local col_msg = c.Red .. message .. c.none
    if usage then
       print(col_msg)
-      glob._error(usage)
+      glob.error(usage)
    else
-      glob._error(col_msg)
+      glob.error(col_msg)
    end
 end
-glob._error = glob.error
-glob.error = error
+glob._error = error
 
 --------------------------------------------------------------------------------
 -- returns true if package is installed, rather than crashing stupidly :-)
