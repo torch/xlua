@@ -266,9 +266,9 @@ glob._require = require
 -- @param ...          [optional] arguments
 --------------------------------------------------------------------------------
 function usage(funcname, description, example, ...)
-   local c = COLORS
+   local c = glob.sys.COLORS
    local str = c.magenta .. '\n'
-   local str = str .. '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
+   local str = str .. '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
    str = str .. 'NAME:\n' .. funcname .. '\n'
    if description then
       str = str .. '\nDESC:\n' .. description .. '\n'
@@ -295,7 +295,7 @@ function usage(funcname, description, example, ...)
          end
          str = str .. key .. '-- ' .. param.help 
          if param.default or param.default == false then
-            str = str .. '  [default = ' .. tostring(param.default) .. ']'
+            str = str .. '  [default = ' .. glob.tostring(param.default) .. ']'
          elseif param.defaulta then
             str = str .. '  [default == ' .. param.defaulta .. ']'
          end
@@ -305,21 +305,30 @@ function usage(funcname, description, example, ...)
 
    -- unnamed args:
    else
-      str = str .. funcname .. '(\n'
-      for i,param in ipairs{...} do
-         local key
-         if param.req then
-            key = '    ' .. param.type
-         else
-            key = '    [' .. param.type .. ']'
+      local args = {...}
+      local idx = 1
+      while true do
+         local param
+         str = str .. funcname .. '(\n'
+         while true do
+            param = args[idx]
+            idx = idx + 1
+            if not param or param == '' then break end
+            local key
+            if param.req then
+               key = '    ' .. param.type
+            else
+               key = '    [' .. param.type .. ']'
+            end
+            -- align:
+            while key:len() < 40 do
+               key = key .. ' '
+            end
+            str = str .. key .. '-- ' .. param.help .. '\n'
          end
-         -- align:
-         while key:len() < 40 do
-            key = key .. ' '
-         end
-         str = str .. key .. '-- ' .. param.help .. '\n'
+         str = str .. ')\n'
+         if not param then break end
       end
-      str = str .. ')\n'
    end
    str = str .. '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
    str = str .. c.none
@@ -346,19 +355,19 @@ function unpack(args, funcname, description, ...)
    -- get args
    local iargs = {}
    if #args == 0 then error(usage)
-   elseif #args == 1 and type(args[1]) == 'table' and #args[1] == 0 then
+   elseif #args == 1 and glob.type(args[1]) == 'table' and #args[1] == 0 then
       -- named args
       iargs = args[1]
    else
       -- ordered args
-      for i = 1,select('#',...) do
+      for i = 1,glob.select('#',...) do
          iargs[defs[i].arg] = args[i]
       end
    end
 
    -- check/set arguments
    local dargs = {}
-   local c = COLORS
+   local c = glob.sys.COLORS
    for i,def in ipairs(defs) do
       -- is value requested ?
       if def.req and iargs[def.arg] == nil then
@@ -379,11 +388,6 @@ function unpack(args, funcname, description, ...)
    -- return usage too
    dargs.usage = usage
 
-   -- print doc ?
-   if _PRINT_DOC_ then
-      unpack_printdoc(dargs, funcname, description, ...)
-   end
-
    -- return modified args
    return dargs,
    dargs[1], dargs[2], dargs[3], dargs[4], dargs[5], dargs[6], dargs[7], dargs[8], 
@@ -403,7 +407,7 @@ end
 function unpack_class(object, args, funcname, description, ...)
    local dargs = unpack(args, funcname, description, ...)
    for k,v in pairs(dargs) do
-      if type(k) ~= 'number' then
+      if glob.type(k) ~= 'number' then
          object[k] = v
       end
    end
