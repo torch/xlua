@@ -59,10 +59,12 @@ module 'xlua'
 print = function(obj,...)
           if glob.type(obj) == 'table' then
               local mt = glob.getmetatable(obj)
+              local tos = glob.tostring(obj)
               if mt and mt.__tostring__ then
                  glob.io.write(mt.__tostring__(obj))
+              elseif tos then
+                 glob.io.write(tos)
               else
-                 local tos = glob.tostring(obj)
                  local obj_w_usage = false
                  if tos and not glob.string.find(tos,'table: ') then
                     if obj.usage then
@@ -229,7 +231,7 @@ function error(message, domain, usage)
       glob.error(col_msg)
    end
 end
-glob._error = error
+glob.xerror = error
 
 --------------------------------------------------------------------------------
 -- returns true if package is installed, rather than crashing stupidly :-)
@@ -247,15 +249,58 @@ function installed(package)
    end
    return found,p
 end
-function require(package) 
-   if installed(package) then
-      return glob.require(package)
-   else
-      print('warning: <' .. package .. '> could not be loaded (is it installed?)')
+
+--------------------------------------------------------------------------------
+-- try to load a package, and doesn't crash if not found !
+-- optionally try to install it from luarocks, and then load it.
+--
+-- @param package      package to load
+-- @param luarocks     if true, then try to install missing package with luarocks
+-- @param server       specify a luarocks server
+--------------------------------------------------------------------------------
+function require(package,luarocks,server) 
+   local load = function() glob.require(package) end
+   local ok,err = glob.pcall(load)
+   if not ok then
+      if luarocks then
+         local search = glob.sys.execute('luarocks search ' .. package 
+                                         .. ((server and (' --from=' .. server)) or ''))
+         if search:find('error') or search:find('Error') then
+            print(search)
+            print('please verify your internet connectivity')
+         elseif search:find(package) then
+            print('<' .. package .. '> not found locally, but available form luarocks:')
+            print(search)
+            print('do you want to install <'.. package ..'> ? [Y/n]')
+            local answer = glob.io.stdin:read '*l'
+            answer = ((answer == '' or answer == 'Y') and 'y') or 'n'
+            if answer == 'y' then
+               local cmd = 'luarocks install ' .. package 
+                  .. ((server and (' --from=' .. server)) or '')
+               print(cmd)
+               print('building/installing: be patient :-)')
+               glob.os.execute(cmd)
+               if package == 'torch' then
+                  print('package <torch> installed, please restart Lua!')
+               else
+                  glob.require(package)
+                  print('package installed and loaded!')
+               end
+            else
+               print('package could not be loaded')
+            end
+         else
+            print(search)
+            print('package not found')
+         end
+      else
+         print(err)
+         print('warning: <' .. package .. '> could not be loaded (is it installed?)')
+      end
       return false
    end
 end
-glob._require = require
+glob.xrequire = require
 
 --------------------------------------------------------------------------------
 -- standard usage function: used to display automated help for functions
