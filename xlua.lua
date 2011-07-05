@@ -265,7 +265,8 @@ end
 -- @param server       specify a luarocks server
 --------------------------------------------------------------------------------
 function require(package,luarocks,server) 
-   local load = function() glob.require(package) end
+   local loaded
+   local load = function() loaded = glob.require(package) end
    local ok,err = glob.pcall(load)
    if not ok then
       if luarocks then
@@ -289,7 +290,7 @@ function require(package,luarocks,server)
                if package == 'torch' then
                   print('package <torch> installed, please restart Lua!')
                else
-                  glob.require(package)
+                  loaded = glob.require(package)
                   print('package installed and loaded!')
                end
             else
@@ -305,6 +306,7 @@ function require(package,luarocks,server)
       end
       return false
    end
+   return loaded
 end
 glob.xrequire = require
 
