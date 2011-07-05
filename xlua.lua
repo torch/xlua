@@ -412,3 +412,39 @@ function unpack_class(object, args, funcname, description, ...)
       end
    end
 end
+
+--------------------------------------------------------------------------------
+-- module help function
+--
+-- @param module       module
+-- @param description  description of the module
+--------------------------------------------------------------------------------
+function usage_module(module, name, description)
+   local c = glob.sys.COLORS
+   local hasglobals = false
+   local str = c.magenta .. '\n'
+   local str = str .. '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
+   str = str .. 'PACKAGE:\n' .. name .. '\n'
+   if description then
+      str = str .. '\nDESC:\n' .. description .. '\n'
+   end
+   str = str .. '\nFUNCTIONS:\n'
+   for key,val in pairs(module) do
+      if glob.type(val) == 'function' then
+         str = str .. key .. '\n'
+      elseif glob.type(val) == 'number' or glob.type(val) == 'string' then
+         hasglobals = true
+      end
+   end
+   if hasglobals then
+      str = str .. '\nGLOBALS:\n'
+      for key,val in pairs(module) do
+         if glob.type(val) == 'number' or glob.type(val) == 'string' then
+            str = str .. key .. '\n'
+         end
+      end
+   end
+   str = str .. '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+   str = str .. c.none
+   return str
+end
