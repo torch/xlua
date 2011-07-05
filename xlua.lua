@@ -232,6 +232,14 @@ end
 glob.xerror = error
 
 --------------------------------------------------------------------------------
+-- provides standard try/catch functions
+--------------------------------------------------------------------------------
+function trycatch(try,catch)
+   local ok,err = glob.pcall(func)
+   if not ok then catch(err) end
+end
+
+--------------------------------------------------------------------------------
 -- returns true if package is installed, rather than crashing stupidly :-)
 --------------------------------------------------------------------------------
 function installed(package) 
