@@ -59,12 +59,10 @@ module 'xlua'
 print = function(obj,...)
           if glob.type(obj) == 'table' then
               local mt = glob.getmetatable(obj)
-              local tos = glob.tostring(obj)
               if mt and mt.__tostring__ then
                  glob.io.write(mt.__tostring__(obj))
-              elseif tos then
-                 glob.io.write(tos)
               else
+                 local tos = glob.tostring(obj)
                  local obj_w_usage = false
                  if tos and not glob.string.find(tos,'table: ') then
                     if obj.usage then
@@ -312,7 +310,7 @@ glob.xrequire = require
 --------------------------------------------------------------------------------
 function usage(funcname, description, example, ...)
    local c = glob.sys.COLORS
-   local str = c.magenta .. '\n'
+   local str = c.magenta
    local str = str .. '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
    str = str .. 'NAME:\n' .. funcname .. '\n'
    if description then
@@ -462,34 +460,23 @@ end
 -- module help function
 --
 -- @param module       module
+-- @param name         module name
 -- @param description  description of the module
 --------------------------------------------------------------------------------
 function usage_module(module, name, description)
    local c = glob.sys.COLORS
    local hasglobals = false
-   local str = c.magenta .. '\n'
+   local str = c.magenta
    local str = str .. '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
    str = str .. 'PACKAGE:\n' .. name .. '\n'
    if description then
       str = str .. '\nDESC:\n' .. description .. '\n'
    end
-   str = str .. '\nFUNCTIONS:\n'
-   for key,val in pairs(module) do
-      if glob.type(val) == 'function' then
-         str = str .. key .. '\n'
-      elseif glob.type(val) == 'number' or glob.type(val) == 'string' then
-         hasglobals = true
-      end
-   end
-   if hasglobals then
-      str = str .. '\nGLOBALS:\n'
-      for key,val in pairs(module) do
-         if glob.type(val) == 'number' or glob.type(val) == 'string' then
-            str = str .. key .. '\n'
-         end
-      end
-   end
    str = str .. '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
    str = str .. c.none
+   -- register help
+   local mt = glob.getmetatable(module) or {}
+   glob.setmetatable(module,mt)
+   mt.__tostring = function() return str end
    return str
 end
