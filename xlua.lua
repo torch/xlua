@@ -226,7 +226,8 @@ function error(message, domain, usage)
       print(col_msg)
       glob.error(usage)
    else
-      glob.error(col_msg)
+      print(col_msg)
+      glob.error('error')
    end
 end
 glob.xerror = error
