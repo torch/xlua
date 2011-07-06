@@ -409,7 +409,8 @@ function unpack(args, funcname, description, ...)
    -- get args
    local iargs = {}
    if #args == 0 then error(usage)
-   elseif #args == 1 and glob.type(args[1]) == 'table' and #args[1] == 0 then
+   elseif #args == 1 and glob.type(args[1]) == 'table' and #args[1] == 0 
+                     and not (glob.torch and glob.torch.typename(args[1]) ~= nil) then
       -- named args
       iargs = args[1]
    else
