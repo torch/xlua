@@ -275,8 +275,11 @@ function require(package,luarocks,server)
    local load = function() loaded = glob.require(package) end
    local ok,err = glob.pcall(load)
    if not ok then
+      local lrocks = glob.sys.concat(glob.sys.prefix, 'bin', 'luarocks')
+      local search = ' search '
+      local install = ' install '
       if luarocks then
-         local search = glob.sys.execute('luarocks search ' .. package 
+         local search = glob.sys.execute(lrocks .. search .. package 
                                          .. ((server and (' --from=' .. server)) or ''))
          if search:find('error') or search:find('Error') then
             print(search)
@@ -288,7 +291,7 @@ function require(package,luarocks,server)
             local answer = glob.io.stdin:read '*l'
             answer = ((answer == '' or answer == 'Y') and 'y') or 'n'
             if answer == 'y' then
-               local cmd = 'luarocks install ' .. package 
+               local cmd = lrocks .. install .. package 
                   .. ((server and (' --from=' .. server)) or '')
                print(cmd)
                print('building/installing: be patient :-)')
