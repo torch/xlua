@@ -28,5 +28,6 @@ build = {
 
    modules = {
       xlua = "xlua.lua",
+      OptionParser = "OptionParser.lua",
    }
 }

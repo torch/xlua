@@ -1,7 +1,8 @@
 ----------------------------------------------------------------------
 --
 -- Copyright (c) 2011 Clement Farabet
--- 
+--           (c) 2008 David Manura (for the OptionParser)
+--
 -- Permission is hereby granted, free of charge, to any person obtaining
 -- a copy of this software and associated documentation files (the
 -- "Software"), to deal in the Software without restriction, including
@@ -28,6 +29,7 @@
 --            and so on...
 --
 -- history: 
+--     July  7, 2011, 12:49AM - added OptionParser from D. Manura
 --     June 30, 2011, 4:54PM - creation - Clement Farabet
 ----------------------------------------------------------------------
 
@@ -52,6 +54,9 @@ local ipairs = ipairs
 local _protect_ = _protect_
 
 module 'xlua'
+
+-- extra files
+glob.dofile(glob.sys.concat(glob.sys.fpath(),'OptionParser.lua'))
 
 ----------------------------------------------------------------------
 -- better print function
