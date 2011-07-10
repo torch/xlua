@@ -20,7 +20,7 @@
 -- options,args = op.parse_args()
 --
 -- now options is the table of options (key, val) and args is the table with non-option arguments.
--- You can use op.fail(message) for failing and op.print_help() for printing the usage as you like.
+-- You can use op.fail(message) for failing and op.help() for printing the usage as you like.
 --
 -- modifed by Benoit Corda, Clement Farabet
 --
@@ -42,7 +42,7 @@ end
 
 function OptionParser:fail(s) -- extension
    io.stderr:write(s .. '\n')
-   self:print_help()
+   self:help()
    os.exit(1)
 end
 
@@ -107,14 +107,15 @@ function OptionParser:parse(options)
       end
    end
    if options.help then
-      self:print_help()
+      self:help()
       os.exit()
    end
    -- set the default if nil
+   self.options = options
    return options, args
 end
 
-function OptionParser:flags_str(optdesc)
+function OptionParser:flags(optdesc)
    local sflags = {}
    local action = optdesc and optdesc.action
    for _,flag in ipairs(optdesc) do
@@ -131,13 +132,13 @@ function OptionParser:flags_str(optdesc)
    return table.concat(sflags, ', ')
 end
 
-function OptionParser:print_help()
+function OptionParser:help()
    io.stdout:write("Usage: " .. self.usage:gsub('%%prog', arg[0]) .. "\n")
    io.stdout:write("\n")
    io.stdout:write("Options:\n")
    pad = 0
    for _,optdesc in ipairs(self.option_descriptions) do
-      pad = math.max(pad, #self:flags_str(optdesc))
+      pad = math.max(pad, #self:flags(optdesc))
    end
    for _,optdesc in ipairs(self.option_descriptions) do
       local defstr = ''
@@ -146,8 +147,15 @@ function OptionParser:print_help()
       elseif optdesc.default then
          defstr = ' [default = ' .. optdesc.default .. ']'
       end
-      io.stdout:write("  " .. self:flags_str(optdesc) ..
-                   string.rep(' ', pad - #self:flags_str(optdesc)) ..
+      io.stdout:write("  " .. self:flags(optdesc) ..
+                   string.rep(' ', pad - #self:flags(optdesc)) ..
                 "  " .. optdesc.help .. defstr .. "\n")
+   end
+end
+
+function OptionParser:summarize()
+   io.stdout:write('<'.. arg[0]:gsub('.lua','') .. "> configuration:\n")
+   for k,v in pairs(self.options) do
+      print(' + ' .. k .. ' = ' .. v)
    end
 end
