@@ -156,6 +156,6 @@ end
 function OptionParser:summarize()
    io.stdout:write('<'.. arg[0]:gsub('.lua','') .. "> configuration:\n")
    for k,v in pairs(self.options) do
-      print(' + ' .. k .. ' = ' .. v)
+      print(' + ' .. k .. ' = ' .. tostring(v))
    end
 end
