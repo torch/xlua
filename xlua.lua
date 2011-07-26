@@ -342,9 +342,12 @@ function usage(funcname, description, example, ...)
 
    -- named arguments:
    local args = {...}
+   if args[1].tabled then
+      args = args[1].tabled 
+   end
    if args[1].arg then
       str = str .. funcname .. '{\n'
-      for i,param in ipairs{...} do
+      for i,param in ipairs(args) do
          local key
          if param.req then
             key = '    ' .. param.arg .. ' = ' .. param.type
@@ -367,7 +370,6 @@ function usage(funcname, description, example, ...)
 
    -- unnamed args:
    else
-      local args = {...}
       local idx = 1
       while true do
          local param
@@ -402,17 +404,22 @@ end
 -- display automated help for functions
 --------------------------------------------------------------------------------
 function unpack(args, funcname, description, ...)
-   -- look at def, autogen example
+   -- put args in table
    local defs = {...}
-   local example
-   if #defs > 1 then
-      example = funcname .. '{' .. defs[2].arg .. '=' .. defs[2].type .. ', '
-                                .. defs[1].arg .. '=' .. defs[1].type .. '}\n'
-      example = example .. funcname .. '(' .. defs[1].type .. ',' .. ' ...)'
-   end
 
-   -- generate usage string
-   local usage = usage(funcname, description, example, ...)
+   -- generate usage string as a closure:
+   -- this way the function only gets called when an error occurs
+   local fusage = function() 
+                     local example
+                     if #defs > 1 then
+                        example = funcname .. '{' .. defs[2].arg .. '=' .. defs[2].type .. ', '
+                           .. defs[1].arg .. '=' .. defs[1].type .. '}\n'
+                        example = example .. funcname .. '(' .. defs[1].type .. ',' .. ' ...)'
+                     end
+                     return usage(funcname, description, example, {tabled=defs})
+                  end
+   local usage = {}
+   glob.setmetatable(usage, {__tostring=fusage})
 
    -- get args
    local iargs = {}
@@ -430,10 +437,11 @@ function unpack(args, funcname, description, ...)
 
    -- check/set arguments
    local dargs = {}
-   local c = glob.sys.COLORS
-   for i,def in ipairs(defs) do
+   for i = 1,#defs do
+      local def = defs[i]
       -- is value requested ?
       if def.req and iargs[def.arg] == nil then
+         local c = glob.sys.COLORS
          print(c.Red .. 'missing argument: ' .. def.arg .. c.none)
          error(usage)
       end
