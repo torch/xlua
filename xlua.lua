@@ -226,7 +226,7 @@ function error(message, domain, usage)
       message = '<' .. domain .. '> ' .. message
    end
    local c = glob.sys.COLORS
-   local col_msg = c.Red .. message .. c.none
+   local col_msg = c.Red .. glob.tostring(message) .. c.none
    if usage then
       print(col_msg)
       glob.error(usage)
