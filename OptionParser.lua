@@ -181,7 +181,7 @@ function OptionParser:tostring(generatefilename, params)
             first = false
          end
       end
-      str = str:gsub('/','_'):gsub(' ','_')
+      str = str:gsub('/','|'):gsub(' ','_')
    end
    return str
 end
