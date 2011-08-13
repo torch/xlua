@@ -36,7 +36,7 @@ function xlua.OptionParser(usage)
       self[k] = v
    end
    self:option{"-h", "--help", action="store_true", dest="help",
-                   help="show this help message and exit"}
+               help="show this help message and exit"}
    return self
 end
 
@@ -153,9 +153,39 @@ function OptionParser:help()
    end
 end
 
-function OptionParser:summarize()
-   io.stdout:write('<'.. arg[0]:gsub('.lua','') .. "> configuration:\n")
-   for k,v in pairs(self.options) do
-      print(' + ' .. k .. ' = ' .. tostring(v))
+function OptionParser:tostring(generatefilename, params)
+   local str = ''
+   if not generatefilename then
+      str = '<'.. arg[0]:gsub('.lua','') .. "> configuration:\n"
+      for k,v in pairs(self.options) do
+         str = str .. ' + ' .. k .. ' = ' .. tostring(v) .. '\n'
+      end
+   else
+      local first = true
+      for i,entry in ipairs(self.option_descriptions) do
+         local key = entry[1]
+         local match = true
+         if #params > 0 then
+            match = false
+            for i,param in ipairs(params) do
+               if key == param then match = true; break end
+            end
+         end
+         local val = self.options[entry.dest]
+         if val and match then
+            if first then
+               str = str .. key .. '=' .. tostring(val)
+            else
+               str = str .. ',' .. key .. '=' .. tostring(val)
+            end
+            first = false
+         end
+      end
+      str = str:gsub('/','_'):gsub(' ','_')
    end
+   return str
+end
+
+function OptionParser:summarize(compact)
+   io.write(self:tostring(compact))
 end
