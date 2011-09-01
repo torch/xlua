@@ -38,10 +38,6 @@ require 'sys'
 require 'io'
 require 'math'
 
--- new prompt
-_G._PROMPT = 'xLua > '
-_G._PROMPT2 = ' ... > '
-
 -- remember startup variables (to protect them)
 _G._protect_ = {'_protect_','xlua'}
 for k,v in pairs(_G) do
@@ -112,8 +108,7 @@ print = function(obj,...)
               glob.io.write('\n')
            end
         end
-glob._print = glob.print
-glob.print = print
+glob.xprint = print
 
 ----------------------------------------------------------------------
 -- clear all globals
