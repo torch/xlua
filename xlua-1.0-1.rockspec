@@ -24,10 +24,8 @@ dependencies = {
 }
 
 build = {
-   type = "builtin",
-
-   modules = {
-      xlua = "xlua.lua",
-      OptionParser = "OptionParser.lua",
+   type = "cmake",
+   variables = {
+      CMAKE_INSTALL_PREFIX = "$(PREFIX)"
    }
 }
