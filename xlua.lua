@@ -66,7 +66,7 @@ print = function(obj,...)
                  local tos = glob.tostring(obj)
                  local obj_w_usage = false
                  if tos and not glob.string.find(tos,'table: ') then
-                    if obj.usage then
+                    if obj.usage and glob.type(obj.usage) == 'string' then
                        glob.io.write(obj.usage)
                        glob.io.write('\n\nFIELDS:\n')
                        obj_w_usage = true
