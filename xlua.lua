@@ -125,6 +125,7 @@ log = function(file)
                             for i = 1,glob.select('#',...) do
                                f:write(arg[i])
                             end
+                            f:flush()
                          end
       end
 
