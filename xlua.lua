@@ -111,6 +111,24 @@ print = function(obj,...)
 glob.xprint = print
 
 ----------------------------------------------------------------------
+-- log all session, by replicating stdout to a file
+----------------------------------------------------------------------
+log = function(file)
+         glob.os.execute('mkdir -p "' .. glob.sys.dirname(file) .. '"')
+         local f = glob.assert(glob.io.open(file,'w'))
+         glob.io._write = glob.io.write
+         glob._print = glob.print
+         glob.print = glob.xprint
+         glob.io.write = function(...)
+                            glob.io._write(...)
+                            local arg = {...}
+                            for i = 1,glob.select('#',...) do
+                               f:write(arg[i])
+                            end
+                         end
+      end
+
+----------------------------------------------------------------------
 -- clear all globals
 ----------------------------------------------------------------------
 clearall = function()
