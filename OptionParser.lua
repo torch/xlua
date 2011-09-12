@@ -145,7 +145,7 @@ function OptionParser:help()
       if optdesc.req then
          defstr = ' [REQUIRED]'
       elseif optdesc.default then
-         defstr = ' [default = ' .. optdesc.default .. ']'
+         defstr = ' [default = ' .. tostring(optdesc.default) .. ']'
       end
       io.stdout:write("  " .. self:flags(optdesc) ..
                    string.rep(' ', pad - #self:flags(optdesc)) ..
