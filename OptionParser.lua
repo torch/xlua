@@ -65,8 +65,12 @@ function OptionParser:parse(options)
    end
 
    if not arg then
+      options.__main__ = false -- python like main
+      self.options = options
       return options, args
    end
+   options.__main__ = true -- python like main
+
    -- expand options (e.g. "--input=file" -> "--input", "file")
    local arg = {unpack(arg)}
    for i=#arg,1,-1 do local v = arg[i]
@@ -133,7 +137,13 @@ function OptionParser:flags(optdesc)
 end
 
 function OptionParser:help()
-   io.stdout:write("Usage: " .. self.usage:gsub('%%prog', arg[0]) .. "\n")
+   if arg[-1] then
+      io.stdout:write("Usage: " .. self.usage:gsub('%%prog', (arg[-1] .. ' ' .. arg[0])) .. "\n")
+   elseif arg[0] then
+      io.stdout:write("Usage: " .. self.usage:gsub('%%prog', arg[0]) .. "\n")
+   else
+      io.stdout:write("Usage: " .. self.usage:gsub('%%prog', 'THISPROG') .. "\n")
+   end
    io.stdout:write("\n")
    io.stdout:write("Options:\n")
    pad = 0
@@ -156,7 +166,7 @@ end
 function OptionParser:tostring(generatefilename, params)
    local str = ''
    if not generatefilename then
-      str = '<'.. arg[0]:gsub('.lua','') .. "> configuration:\n"
+      str = '<'.. ((arg and arg[0]) or 'interpreted.lua'):gsub('.lua','') .. "> configuration:\n"
       for k,v in pairs(self.options) do
          str = str .. ' + ' .. k .. ' = ' .. tostring(v) .. '\n'
       end
