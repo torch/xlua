@@ -200,7 +200,7 @@ function progress(current, goal)
    local percent = glob.math.floor(((current) * barLength) / goal)
 
    -- start new bar
-   if (barDone and current == 1) then
+   if (barDone and ((previous == -1) or (percent < previous))) then
       barDone = false
       previous = -1
    else
