@@ -85,9 +85,9 @@ print = function(obj,...)
                        local tostr = glob.tostring(v):gsub('\n','\\n')
                        if #tostr>40 then
                           local tostrshort = tostr:sub(1,40) .. glob.sys.COLORS.none
-                          glob.io.write(tab .. '[' .. k .. ']' .. ' = ' .. tostrshort .. ' ... ')
+                          glob.io.write(tab .. '[' .. glob.tostring(k) .. ']' .. ' = ' .. tostrshort .. ' ... ')
                        else
-                          glob.io.write(tab .. '[' .. k .. ']' .. ' = ' .. tostr)
+                          glob.io.write(tab .. '[' .. glob.tostring(k) .. ']' .. ' = ' .. tostr)
                        end
                     end
                     tab = ' '
