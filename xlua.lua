@@ -52,7 +52,8 @@ local _protect_ = _protect_
 module 'xlua'
 
 -- extra files
-glob.dofile(glob.sys.concat(glob.sys.fpath(),'OptionParser.lua'))
+glob.dofile(glob.sys.concat(glob.sys.fpath(), 'OptionParser.lua'))
+glob.dofile(glob.sys.concat(glob.sys.fpath(), 'Profiler.lua'))
 
 ----------------------------------------------------------------------
 -- better print function

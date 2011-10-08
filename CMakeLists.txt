@@ -15,3 +15,4 @@ ENDIF(${CMAKE_PROJECT_NAME} STREQUAL "Torch")
 
 install_files(${INSTALL_PREFIX} xlua.lua)
 install_files(${INSTALL_PREFIX} OptionParser.lua)
+install_files(${INSTALL_PREFIX} Profiler.lua)
