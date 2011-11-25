@@ -335,29 +335,6 @@ end
 glob.xrequire = require
 
 --------------------------------------------------------------------------------
--- import package's symbols globally
---
--- @param   package      package to load
--- @package as           import as (python-like import)
---------------------------------------------------------------------------------
-function import(package, as)
-   require(package)
-   if as then
-      glob[as] = glob[package]
-   else
-      for k,v in pairs(glob[package]) do
-         if glob[k] then
-            print('warning: "' .. k .. '" defined both globally and in package "' 
-                  .. package .. '", skipping import')
-         else
-            glob[k] = v
-         end
-      end
-   end
-end
-glob.import = import
-
---------------------------------------------------------------------------------
 -- standard usage function: used to display automated help for functions
 --
 -- @param funcname     function name
