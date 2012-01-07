@@ -355,7 +355,7 @@ function usage(funcname, description, example, ...)
 
    local str = style.banner .. '\n'
 
-   str = str .. style.title .. funcname:upper() .. style.none .. '\n'
+   str = str .. style.title .. funcname .. style.none .. '\n'
    if description then
       str = str .. '\n' .. description .. '\n'
    end
