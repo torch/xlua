@@ -240,15 +240,11 @@ function error(message, domain, usage)
    if domain then
       message = '<' .. domain .. '> ' .. message
    end
-   local c = glob.sys.COLORS
-   local col_msg = c.Red .. glob.tostring(message) .. c.none
+   local col_msg = c.Red .. tostring(message) .. c.none
    if usage then
-      print(col_msg)
-      glob.error(usage)
-   else
-      print(col_msg)
-      glob.error('error')
+      col_msg = col_msg .. '\n' .. usage
    end
+   glob.error(col_msg)
 end
 glob.xerror = error
 
@@ -344,16 +340,27 @@ glob.xrequire = require
 --------------------------------------------------------------------------------
 function usage(funcname, description, example, ...)
    local c = glob.sys.COLORS
-   local str = c.magenta
-   local str = str .. '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n'
-   str = str .. 'NAME:\n' .. funcname .. '\n'
+
+   local style = {
+      banner = '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
+      list = c.blue .. '> ' .. c.none,
+      title = c.Magenta,
+      pre = c.cyan,
+      em = c.Black,
+      img = c.red,
+      link = c.red,
+      code = c.green,
+      none = c.none
+   }
+
+   local str = style.banner .. '\n'
+
+   str = str .. style.title .. funcname:upper() .. style.none .. '\n'
    if description then
-      str = str .. '\nDESC:\n' .. description .. '\n'
+      str = str .. '\n' .. description .. '\n'
    end
-   if example then
-      str = str .. '\nEXAMPLE:\n' .. example .. '\n'
-   end
-   str = str .. '\nUSAGE:\n'
+
+   str = str .. '\n' .. style.list .. 'usage:\n' .. style.pre
 
    -- named arguments:
    local args = {...}
@@ -409,8 +416,13 @@ function usage(funcname, description, example, ...)
          if not param then break end
       end
    end
-   str = str .. '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-   str = str .. c.none
+   str = str .. style.none
+
+   if example then
+      str = str .. '\n' .. style.pre .. example .. style.none .. '\n'
+   end
+
+   str = str .. style.banner
    return str
 end
 
@@ -438,7 +450,9 @@ function unpack(args, funcname, description, ...)
 
    -- get args
    local iargs = {}
-   if #args == 0 then error(usage)
+   if #args == 0 then
+      print(usage)
+      error('error')
    elseif #args == 1 and glob.type(args[1]) == 'table' and #args[1] == 0 
                      and not (glob.torch and glob.torch.typename(args[1]) ~= nil) then
       -- named args
@@ -458,7 +472,8 @@ function unpack(args, funcname, description, ...)
       if def.req and iargs[def.arg] == nil then
          local c = glob.sys.COLORS
          print(c.Red .. 'missing argument: ' .. def.arg .. c.none)
-         error(usage)
+         print(usage)
+         error('error')
       end
       -- get value or default
       dargs[def.arg] = iargs[def.arg]
@@ -474,6 +489,11 @@ function unpack(args, funcname, description, ...)
    -- return usage too
    dargs.usage = usage
 
+   -- stupid lua bug: we return all args by hand
+   if dargs[65] then
+      error('<xlua.unpack> oups, cant deal with more than 64 arguments :-)')
+   end
+
    -- return modified args
    return dargs,
    dargs[1], dargs[2], dargs[3], dargs[4], dargs[5], dargs[6], dargs[7], dargs[8], 
@@ -482,7 +502,8 @@ function unpack(args, funcname, description, ...)
    dargs[25], dargs[26], dargs[27], dargs[28], dargs[29], dargs[30], dargs[31], dargs[32],
    dargs[33], dargs[34], dargs[35], dargs[36], dargs[37], dargs[38], dargs[39], dargs[40],
    dargs[41], dargs[42], dargs[43], dargs[44], dargs[45], dargs[46], dargs[47], dargs[48],
-   dargs[49], dargs[50], dargs[51], dargs[52], dargs[53], dargs[54], dargs[55], dargs[56]
+   dargs[49], dargs[50], dargs[51], dargs[52], dargs[53], dargs[54], dargs[55], dargs[56],
+   dargs[57], dargs[58], dargs[59], dargs[60], dargs[61], dargs[62], dargs[63], dargs[64]
 end
 
 --------------------------------------------------------------------------------
