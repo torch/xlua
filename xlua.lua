@@ -237,10 +237,11 @@ end
 -- following: <domain> msg
 --------------------------------------------------------------------------------
 function error(message, domain, usage) 
+   local c = glob.sys.COLORS
    if domain then
       message = '<' .. domain .. '> ' .. message
    end
-   local col_msg = c.Red .. tostring(message) .. c.none
+   local col_msg = c.Red .. glob.tostring(message) .. c.none
    if usage then
       col_msg = col_msg .. '\n' .. usage
    end
