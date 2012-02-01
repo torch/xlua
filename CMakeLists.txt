@@ -1,18 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+FIND_PACKAGE(Torch REQUIRED)
 
-IF(${CMAKE_PROJECT_NAME} STREQUAL "Torch")
+SET(src)
+SET(luasrc init.lua OptionParser.lua Profiler.lua)
 
-  SET(TORCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-  SET(INSTALL_PREFIX /${Torch_INSTALL_LUA_PATH_SUBDIR})
-  SET(CINSTALL_PREFIX /${Torch_INSTALL_LUA_CPATH_SUBDIR})
+ADD_TORCH_PACKAGE(xlua "${src}" "${luasrc}" "System")
 
-ELSE(${CMAKE_PROJECT_NAME} STREQUAL "Torch")
-
-  string (REGEX REPLACE "(.*)lib/luarocks/rocks.*" "\\1" LUA_PREFIX "${CMAKE_INSTALL_PREFIX}" )
-  SET(INSTALL_PREFIX /lua )
-  SET(CINSTALL_PREFIX /lib)
-ENDIF(${CMAKE_PROJECT_NAME} STREQUAL "Torch")
-
-install_files(${INSTALL_PREFIX} xlua.lua)
-install_files(${INSTALL_PREFIX} OptionParser.lua)
-install_files(${INSTALL_PREFIX} Profiler.lua)
