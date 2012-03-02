@@ -1,9 +1,11 @@
+DEPENDENCIES:
+Torch7 (www.torch.ch)
 
 INSTALL:
-$ luarocks --from=http://data.neuflow.org/lua/rocks install xlua
+$ torch-pkg install xlua
 
 USE:
-$ lua -lxlua
+$ torch -lxlua
 xLua > a = 5
 xLua > b = 'test'
 xLua > xlua.who()
