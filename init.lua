@@ -47,6 +47,10 @@ end
 local glob = _G
 local pairs = pairs
 local ipairs = ipairs
+local table = table
+local string = string
+local pcall = pcall
+local loadstring = loadstring
 local _protect_ = _protect_
 
 module 'xlua'
@@ -544,4 +548,76 @@ function usage_module(module, name, description)
    glob.setmetatable(module,mt)
    mt.__tostring = function() return str end
    return str
+end
+
+--------------------------------------------------------------------------------
+-- splicing: remove elements from a table
+--------------------------------------------------------------------------------
+function table.splice(tbl, start, length)
+   length = length or 1
+   start = start or 1
+   local endd = start + length
+   local spliced = {}
+   local remainder = {}
+   for i,elt in ipairs(tbl) do
+      if i < start or i >= endd then
+         table.insert(spliced, elt)
+      else
+         table.insert(remainder, elt)
+      end
+   end
+   return spliced, remainder
+end
+
+--------------------------------------------------------------------------------
+-- prune: remove duplicates from a table
+--------------------------------------------------------------------------------
+function table.prune(tbl)
+   local hashes = {}
+   for i,v in ipairs(tbl) do
+      hashes[v] = true
+   end
+   local ntbl = {}
+   for v in pairs(hashes) do
+      table.insert(ntbl, v)
+   end
+   return ntbl
+end
+
+--------------------------------------------------------------------------------
+-- split a string using a pattern
+--------------------------------------------------------------------------------
+function string.split(str, pat)
+   local t = {}  -- NOTE: use {n = 0} in Lua-5.0
+   local fpat = "(.-)" .. pat
+   local last_end = 1
+   local s, e, cap = str:find(fpat, 1)
+   while s do
+      if s ~= 1 or cap ~= "" then
+         table.insert(t,cap)
+      end
+      last_end = e+1
+      s, e, cap = str:find(fpat, last_end)
+   end
+   if last_end <= #str then
+      cap = str:sub(last_end)
+      table.insert(t, cap)
+   end
+   return t
+end
+
+--------------------------------------------------------------------------------
+-- eval: just a shortcut to parse strings into symbols
+-- example: 
+-- assert( string.tosymbol('madgraph.Image.File') == madgraph.Image.File )
+--------------------------------------------------------------------------------
+function string.tosymbol(str)
+   local ok,result = pcall(loadstring('return ' .. str))
+   if not ok then
+      glob.error(result)
+   elseif not result then
+      glob.error('symbol "' .. str .. '" does not exist')
+   else
+      return result
+   end
 end
