@@ -219,7 +219,7 @@ function formatTime(seconds)
    if minutes > 0 and i <= 2 then f = f .. minutes .. 'm' i=i+1 end
    if secondsf > 0 and i <= 2 then f = f .. secondsf .. 's' i=i+1 end
    if millis > 0 and i <= 2 then f = f .. millis .. 'ms' i=i+1 end
-   if f == '' then f = '0s' end
+   if f == '' then f = '0ms' end
 
    -- return formatted time
    return f
