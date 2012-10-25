@@ -37,6 +37,7 @@ require 'os'
 require 'sys'
 require 'io'
 require 'math'
+require 'torch'
 
 -- remember startup variables (to protect them)
 _G._protect_ = {'_protect_','xlua'}
@@ -45,6 +46,7 @@ for k,v in pairs(_G) do
 end
 
 local glob = _G
+local torch = torch
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -194,10 +196,42 @@ who = function()
 end
 
 ----------------------------------------------------------------------
+-- time
+----------------------------------------------------------------------
+function formatTime(seconds)
+   -- decompose:
+   local floor = glob.math.floor
+   local days = floor(seconds / 3600/24)
+   seconds = seconds - days*3600*24
+   local hours = floor(seconds / 3600)
+   seconds = seconds - hours*3600
+   local minutes = floor(seconds / 60)
+   seconds = seconds - minutes*60
+   local secondsf = floor(seconds)
+   seconds = seconds - secondsf
+   local millis = floor(seconds*1000)
+
+   -- string
+   local f = ''
+   local i = 1
+   if days > 0 then f = f .. days .. 'D' i=i+1 end
+   if hours > 0 and i <= 2 then f = f .. hours .. 'h' i=i+1 end
+   if minutes > 0 and i <= 2 then f = f .. minutes .. 'm' i=i+1 end
+   if secondsf > 0 and i <= 2 then f = f .. secondsf .. 's' i=i+1 end
+   if millis > 0 and i <= 2 then f = f .. millis .. 'ms' i=i+1 end
+   if f == '' then f = '0s' end
+
+   -- return formatted time
+   return f
+end
+
+----------------------------------------------------------------------
 -- progress bar
 ----------------------------------------------------------------------
 local barDone = true
 local previous = -1
+local timer
+local lasttime
 function progress(current, goal)
    local barLength = 77
 
@@ -208,6 +242,8 @@ function progress(current, goal)
    if (barDone and ((previous == -1) or (percent < previous))) then
       barDone = false
       previous = -1
+      timer = torch.Timer()
+      lasttime = nil
    else
       glob.io.write('\r')
    end
@@ -222,9 +258,17 @@ function progress(current, goal)
          elseif (i == percent) then glob.io.write('>')
          else glob.io.write('.') end
       end
-      glob.io.write(']')
+      glob.io.write('] ')
+      -- time stats
+      for i=1,30 do glob.io.write(' ') end
+      for i=1,30 do glob.io.write('\b') end
+      local elapsed = timer:time().real
+      local step = elapsed / current
+      local remaining = glob.math.max(0,(goal - current)*step)
+      local tm = 'ETA: ' .. formatTime(remaining) .. ' | Average: ' .. formatTime(step)
+      glob.io.write(tm)
       -- go back to center of bar, and print progress
-      for i=1,47 do glob.io.write('\b') end
+      for i=1,47+#tm do glob.io.write('\b') end
       glob.io.write(' ', current, '/', goal, ' ')
       -- reset for next bar
       if (percent == barLength) then
