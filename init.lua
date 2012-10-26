@@ -262,8 +262,8 @@ function progress(current, goal)
       end
       glob.io.write('] ')
       -- time stats
-      for i=1,30 do glob.io.write(' ') end
-      for i=1,30 do glob.io.write('\b') end
+      for i=1,50 do glob.io.write(' ') end
+      for i=1,50 do glob.io.write('\b') end
       local elapsed = timer:time().real
       local step = (elapsed-lasttime) / (current-lastindex)
       if current==lastindex then step = 0 end
