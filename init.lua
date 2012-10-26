@@ -232,6 +232,7 @@ local barDone = true
 local previous = -1
 local timer
 local lasttime
+local lastindex
 function progress(current, goal)
    local barLength = 77
 
@@ -243,7 +244,8 @@ function progress(current, goal)
       barDone = false
       previous = -1
       timer = torch.Timer()
-      lasttime = nil
+      lasttime = timer:time().real
+      lastindex = 1
    else
       glob.io.write('\r')
    end
@@ -263,9 +265,10 @@ function progress(current, goal)
       for i=1,30 do glob.io.write(' ') end
       for i=1,30 do glob.io.write('\b') end
       local elapsed = timer:time().real
-      local step = elapsed / current
+      local step = (elapsed-lasttime) / (current-lastindex)
+      if current==lastindex then step = 0 end
       local remaining = glob.math.max(0,(goal - current)*step)
-      local tm = 'ETA: ' .. formatTime(remaining) .. ' | Average: ' .. formatTime(step)
+      local tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
       glob.io.write(tm)
       -- go back to center of bar, and print progress
       for i=1,47+#tm do glob.io.write('\b') end
