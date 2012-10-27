@@ -268,6 +268,8 @@ function progress(current, goal)
       local step = (elapsed-lasttime) / (current-lastindex)
       if current==lastindex then step = 0 end
       local remaining = glob.math.max(0,(goal - current)*step)
+      lasttime = elapsed
+      lastindex = current
       local tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
       glob.io.write(tm)
       -- go back to center of bar, and print progress
