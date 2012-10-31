@@ -228,58 +228,70 @@ end
 ----------------------------------------------------------------------
 -- progress bar
 ----------------------------------------------------------------------
-local barDone = true
-local previous = -1
-local timer
-local lasttime
-local lastindex
-function progress(current, goal)
-   local barLength = 77
+do
+   local barDone = true
+   local previous = -1
+   local timer
+   local times
+   local indices
+   function progress(current, goal)
+      -- defaults:
+      local barLength = 77
+      local smoothing = 100 
+      local maxfps = 10
+      
+      -- Compute percentage
+      local percent = glob.math.floor(((current) * barLength) / goal)
 
-   -- Compute percentage
-   local percent = glob.math.floor(((current) * barLength) / goal)
-
-   -- start new bar
-   if (barDone and ((previous == -1) or (percent < previous))) then
-      barDone = false
-      previous = -1
-      timer = torch.Timer()
-      lasttime = timer:time().real
-      lastindex = 1
-   else
-      glob.io.write('\r')
-   end
-
-   --if (percent ~= previous and not barDone) then
-   if (not barDone) then
-      previous = percent
-      -- print bar
-      glob.io.write(' [')
-      for i=1,barLength do
-         if (i < percent) then glob.io.write('=')
-         elseif (i == percent) then glob.io.write('>')
-         else glob.io.write('.') end
+      -- start new bar
+      if (barDone and ((previous == -1) or (percent < previous))) then
+         barDone = false
+         previous = -1
+         timer = torch.Timer()
+         times = {timer:time().real}
+         indices = {current}
+      else
+         glob.io.write('\r')
       end
-      glob.io.write('] ')
-      -- time stats
-      for i=1,50 do glob.io.write(' ') end
-      for i=1,50 do glob.io.write('\b') end
-      local elapsed = timer:time().real
-      local step = (elapsed-lasttime) / (current-lastindex)
-      if current==lastindex then step = 0 end
-      local remaining = glob.math.max(0,(goal - current)*step)
-      local tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
-      glob.io.write(tm)
-      -- go back to center of bar, and print progress
-      for i=1,47+#tm do glob.io.write('\b') end
-      glob.io.write(' ', current, '/', goal, ' ')
-      -- reset for next bar
-      if (percent == barLength) then
-         barDone = true
-         glob.io.write('\n')
+
+      --if (percent ~= previous and not barDone) then
+      if (not barDone) then
+         previous = percent
+         -- print bar
+         glob.io.write(' [')
+         for i=1,barLength do
+            if (i < percent) then glob.io.write('=')
+            elseif (i == percent) then glob.io.write('>')
+            else glob.io.write('.') end
+         end
+         glob.io.write('] ')
+         -- time stats
+         for i=1,50 do glob.io.write(' ') end
+         for i=1,50 do glob.io.write('\b') end
+         local elapsed = timer:time().real
+         local step = (elapsed-times[1]) / (current-indices[1])
+         if current==indices[1] then step = 0 end
+         local remaining = glob.math.max(0,(goal - current)*step)
+         table.insert(indices, current)
+         table.insert(times, elapsed)
+         if #indices > smoothing then
+            indices = table.splice(indices)
+            times = table.splice(times)
+         end
+         local tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
+         glob.io.write(tm)
+         -- go back to center of bar, and print progress
+         for i=1,47+#tm do glob.io.write('\b') end
+         glob.io.write(' ', current, '/', goal, ' ')
+         -- reset for next bar
+         if (percent == barLength) then
+            barDone = true
+            glob.io.write('\n')
+         end
+         -- flush
+         glob.io.write('\r')
+         glob.io.flush()
       end
-      -- flush
-      glob.io.flush()
    end
 end
 
