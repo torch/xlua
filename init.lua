@@ -618,14 +618,29 @@ end
 
 --------------------------------------------------------------------------------
 -- prune: remove duplicates from a table
+-- if a hash function is provided, it is used to produce a unique hash for each
+-- element in the input table.
+-- if a merge function is provided, it defines how duplicate entries are merged,
+-- otherwise, a random entry is picked.
 --------------------------------------------------------------------------------
-function table.prune(tbl)
+function table.prune(tbl, hashfunc, merge)
    local hashes = {}
-   for i,v in ipairs(tbl) do
-      hashes[v] = true
+   local hash = hashfunc or function(a) return a end
+   if merge then
+      for i,v in ipairs(tbl) do
+         if not hashes[hash(v)] then 
+            hashes[hash(v)] = v
+         else
+            hashes[hash(v)] = merge(v, hashes[hash(v)])
+         end
+      end
+   else
+      for i,v in ipairs(tbl) do
+         hashes[hash(v)] = v
+      end
    end
    local ntbl = {}
-   for v in pairs(hashes) do
+   for _,v in pairs(hashes) do
       table.insert(ntbl, v)
    end
    return ntbl
