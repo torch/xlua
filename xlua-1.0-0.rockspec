@@ -2,7 +2,7 @@ package = "xlua"
 version = "1.0-0"
 
 source = {
-   url = "https://github.com/clementfarabet/lua---sys"
+   url = "git://github.com/clementfarabet/lua---sys"
 }
 
 description = {
