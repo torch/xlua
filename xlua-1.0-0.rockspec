@@ -23,8 +23,10 @@ dependencies = {
 }
 
 build = {
-   type = "cmake",
-   variables = {
-      LUAROCKS_PREFIX = "$(PREFIX)"
+   type = "builtin",
+   modules = {
+      ['xlua.init'] = 'init.lua',
+      ['xlua.OptionParser'] = 'OptionParser.lua',
+      ['xlua.Profiler'] = 'Profiler.lua'
    }
 }
