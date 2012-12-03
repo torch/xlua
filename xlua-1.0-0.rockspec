@@ -19,6 +19,7 @@ and provide other general purpose tools (progress bar, ...).
 
 dependencies = {
    "torch >= 7.0",
+   "sys >= 1.0"
 }
 
 build = {
