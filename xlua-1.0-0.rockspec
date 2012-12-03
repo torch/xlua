@@ -3,7 +3,8 @@ version = "1.0-0"
 
 source = {
    url = "git://github.com/clementfarabet/lua---xlua",
-   tag = "1.0-0"
+   tag = "1.0-0",
+   dir = 'lua---xlua'
 }
 
 description = {
