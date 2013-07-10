@@ -1,10 +1,15 @@
-DEPENDENCIES:
+# A set of useful extensions to Lua
+
+## Dependencies:
 Torch7 (www.torch.ch)
 
-INSTALL:
+## Install:
+```
 $ torch-rocks install xlua
+```
 
-USE:
+## Use
+```
 $ torch -lxlua
 xLua > a = 5
 xLua > b = 'test'
@@ -60,4 +65,4 @@ xLua > =test
 {[a] = 14,
  [b] = test}
 xLua > 
-
+```
