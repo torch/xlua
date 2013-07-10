@@ -2,9 +2,9 @@ package = "xlua"
 version = "1.0-0"
 
 source = {
-   url = "git://github.com/clementfarabet/lua---xlua",
+   url = "git://github.com/torch/xlua",
    tag = "1.0-0",
-   dir = 'lua---xlua'
+   dir = 'xlua'
 }
 
 description = {
@@ -14,7 +14,7 @@ Lua is pretty compact in terms of built-in functionalities:
 this package extends the table and string libraries, 
 and provide other general purpose tools (progress bar, ...).
    ]],
-   homepage = "https://github.com/clementfarabet/lua---xlua",
+   homepage = "https://github.com/torch/xlua",
    license = "BSD"
 }
 
