@@ -3,7 +3,8 @@ version = "1.0-0"
 
 source = {
    url = "git://github.com/torch/xlua",
-   dir = 'xlua'
+   dir = 'xlua',
+   tag = '1.0-0'
 }
 
 description = {
