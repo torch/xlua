@@ -49,6 +49,7 @@ local glob = _G
 local torch = torch
 local pairs = pairs
 local ipairs = ipairs
+local require = require
 local table = table
 local string = string
 local pcall = pcall
@@ -58,8 +59,8 @@ local _protect_ = _protect_
 module 'xlua'
 
 -- extra files
-glob.dofile(glob.sys.concat(glob.sys.fpath(), 'OptionParser.lua'))
-glob.dofile(glob.sys.concat(glob.sys.fpath(), 'Profiler.lua'))
+require 'xlua.OptionParser'
+require 'xlua.Profiler'
 
 ----------------------------------------------------------------------
 -- better print function
@@ -336,63 +337,6 @@ function installed(package)
    end
    return found,p
 end
-
---------------------------------------------------------------------------------
--- try to load a package, and doesn't crash if not found !
--- optionally try to install it from luarocks, and then load it.
---
--- @param package      package to load
--- @param luarocks     if true, then try to install missing package with luarocks
--- @param server       specify a luarocks server
---------------------------------------------------------------------------------
-function require(package,luarocks,server) 
-   local loaded
-   local load = function() loaded = glob.require(package) end
-   local ok,err = glob.pcall(load)
-   if not ok then
-      local lrocks = glob.sys.concat(glob.sys.prefix, 'bin', 'luarocks')
-      local search = ' search '
-      local install = ' install '
-      if luarocks then
-         local search = glob.sys.execute(lrocks .. search .. package 
-                                         .. ((server and (' --from=' .. server)) or ''))
-         if search:find('error') or search:find('Error') then
-            print(search)
-            print('please verify your internet connectivity')
-         elseif search:find(package) then
-            print('<' .. package .. '> not found locally, but available form luarocks:')
-            print(search)
-            print('do you want to install <'.. package ..'> ? [Y/n]')
-            local answer = glob.io.stdin:read '*l'
-            answer = ((answer == '' or answer == 'Y') and 'y') or 'n'
-            if answer == 'y' then
-               local cmd = lrocks .. install .. package 
-                  .. ((server and (' --from=' .. server)) or '')
-               print(cmd)
-               print('building/installing: be patient :-)')
-               glob.os.execute(cmd)
-               if package == 'torch' then
-                  print('package <torch> installed, please restart Lua!')
-               else
-                  loaded = glob.require(package)
-                  print('package installed and loaded!')
-               end
-            else
-               print('package could not be loaded')
-            end
-         else
-            print(search)
-            print('package not found')
-         end
-      else
-         print(err)
-         print('warning: <' .. package .. '> could not be loaded (is it installed?)')
-      end
-      return false
-   end
-   return loaded
-end
-glob.xrequire = require
 
 --------------------------------------------------------------------------------
 -- standard usage function: used to display automated help for functions
