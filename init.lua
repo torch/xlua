@@ -58,8 +58,8 @@ local _protect_ = _protect_
 module 'xlua'
 
 -- extra files
-_G.require 'xlua.OptionParser'
-_G.require 'xlua.Profiler'
+glob.require 'xlua.OptionParser'
+glob.require 'xlua.Profiler'
 
 ----------------------------------------------------------------------
 -- better print function
