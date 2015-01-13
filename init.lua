@@ -40,7 +40,7 @@ require 'math'
 require 'torch'
 
 -- remember startup variables (to protect them)
-_G._protect_ = {'_protect_','xlua'}
+rawset(_G, '_protect_',{'_protect_','xlua'})
 for k,v in pairs(_G) do
    table.insert(_G._protect_, k)
 end
@@ -115,7 +115,7 @@ print = function(obj,...)
               glob.io.write('\n')
            end
         end
-glob.xprint = print
+glob.rawset(glob, 'xprint', print)
 
 ----------------------------------------------------------------------
 -- log all session, by replicating stdout to a file
@@ -310,7 +310,7 @@ function error(message, domain, usage)
    end
    glob.error(col_msg)
 end
-glob.xerror = error
+glob.rawset(glob, 'xerror', error)
 
 --------------------------------------------------------------------------------
 -- provides standard try/catch functions
@@ -356,7 +356,7 @@ function require(package,luarocks,server)
    end
    return loaded
 end
-glob.xrequire = require
+glob.rawset(glob, 'xrequire', require)
 
 --------------------------------------------------------------------------------
 -- standard usage function: used to display automated help for functions
