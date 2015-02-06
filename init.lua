@@ -246,8 +246,6 @@ do
    local termLength = getTermLength()
    function progress(current, goal)
       -- defaults:
-      for i=1,termLength do glob.io.write(' ') end
-      for i=1,termLength do glob.io.write('\b') end
       local barLength = termLength - 34
       local smoothing = 100 
       local maxfps = 10
@@ -278,6 +276,8 @@ do
             else glob.io.write('.') end
          end
          glob.io.write('] ')
+         for i=1,termLength-barLength-4 do glob.io.write(' ') end
+         for i=1,termLength-barLength-4 do glob.io.write('\b') end
          -- time stats
          local elapsed = timer:time().real
          local step = (elapsed-times[1]) / (current-indices[1])
