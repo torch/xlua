@@ -231,6 +231,7 @@ end
 do
    local barDone = true
    local previous = -1
+   local tm = ''
    local timer
    local times
    local indices
@@ -247,6 +248,7 @@ do
       if (barDone and ((previous == -1) or (percent < previous))) then
          barDone = false
          previous = -1
+         tm = ''
          timer = torch.Timer()
          times = {timer:time().real}
          indices = {current}
@@ -266,8 +268,8 @@ do
          end
          glob.io.write('] ')
          -- time stats
-         for i=1,50 do glob.io.write(' ') end
-         for i=1,50 do glob.io.write('\b') end
+         for i=1,#tm do glob.io.write(' ') end
+         for i=1,#tm do glob.io.write('\b') end
          local elapsed = timer:time().real
          local step = (elapsed-times[1]) / (current-indices[1])
          if current==indices[1] then step = 0 end
@@ -278,7 +280,7 @@ do
             indices = table.splice(indices)
             times = table.splice(times)
          end
-         local tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
+         tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
          glob.io.write(tm)
          -- go back to center of bar, and print progress
          for i=1,47+#tm do glob.io.write('\b') end
