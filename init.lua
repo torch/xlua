@@ -229,15 +229,24 @@ end
 -- progress bar
 ----------------------------------------------------------------------
 do
+   local function getTermLength()
+      local tputf = glob.io.popen('tput cols', 'r')
+      local w = glob.tonumber(tputf:read('*a'))
+      local rc = {tputf:close()}
+      if rc[3] == 0 then return w
+      else return 80 end 
+   end
+
    local barDone = true
    local previous = -1
    local tm = ''
    local timer
    local times
    local indices
+   local termLength = getTermLength()
    function progress(current, goal)
       -- defaults:
-      local barLength = 77
+      local barLength = termLength - 34
       local smoothing = 100 
       local maxfps = 10
       
@@ -267,9 +276,9 @@ do
             else glob.io.write('.') end
          end
          glob.io.write('] ')
+         for i=1,termLength-barLength-4 do glob.io.write(' ') end
+         for i=1,termLength-barLength-4 do glob.io.write('\b') end
          -- time stats
-         for i=1,#tm do glob.io.write(' ') end
-         for i=1,#tm do glob.io.write('\b') end
          local elapsed = timer:time().real
          local step = (elapsed-times[1]) / (current-indices[1])
          if current==indices[1] then step = 0 end
@@ -283,7 +292,7 @@ do
          tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
          glob.io.write(tm)
          -- go back to center of bar, and print progress
-         for i=1,47+#tm do glob.io.write('\b') end
+         for i=1,6+#tm+barLength/2 do glob.io.write('\b') end
          glob.io.write(' ', current, '/', goal, ' ')
          -- reset for next bar
          if (percent == barLength) then
