@@ -110,7 +110,7 @@ rawset(_G, 'xprint', xlua.print)
 -- log all session, by replicating stdout to a file
 ----------------------------------------------------------------------
 function xlua.log(file)
-   os.execute('mkdir -p "' .. sys.dirname(file) .. '"')
+   os.execute('mkdir ' .. (sys.uname() ~= 'windows' and '-p ' or '') .. ' "' .. sys.dirname(file) .. '"')
    local f = assert(io.open(file,'w'))
    io._write = io.write
    _G._print = _G.print
@@ -220,6 +220,7 @@ local formatTime = xlua.formatTime
 ----------------------------------------------------------------------
 do
    local function getTermLength()
+      if sys.uname() == 'windows' then return 80 end
       local tputf = io.popen('tput cols', 'r')
       local w = tonumber(tputf:read('*a'))
       local rc = {tputf:close()}
