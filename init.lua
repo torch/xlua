@@ -360,6 +360,55 @@ function xlua.require(package,luarocks,server)
 end
 rawset(_G, 'xrequire', xlua.require)
 
+
+
+--http://lua-users.org/wiki/TableUtils
+local function table_val_to_str ( v )
+   if "string" == type( v ) then
+      v = string.gsub( v, "\n", "\\n" )
+      if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
+         return "'" .. v .. "'"
+      end
+      return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
+   else
+      return "table" == type( v ) and xlua.table2string( v ) or tostring( v )
+   end
+end
+
+local function table_key_to_str ( k )
+   if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
+      return k
+   else
+      return "[" .. table_val_to_str( k ) .. "]"
+   end
+end
+
+function xlua.table2string(tbl, newline)
+   local result, done = {}, {}
+   for k, v in ipairs( tbl ) do
+      table.insert( result, table_val_to_str( v ) )
+      done[ k ] = true
+   end
+   local s = "="
+   if newline then
+      s = " : "
+   end
+   for k, v in pairs( tbl ) do
+      if not done[ k ] then
+         local line = table_key_to_str( k ) .. s .. table_val_to_str( v )
+         table.insert(result, line)
+      end
+   end
+   local res
+   if newline then
+      res = "{\n   " .. table.concat( result, "\n   " ) .. "\n}"
+   else
+      res = "{" .. table.concat( result, "," ) .. "}"
+   end
+   return res
+end
+
+
 --------------------------------------------------------------------------------
 -- standard usage function: used to display automated help for functions
 --
@@ -411,7 +460,9 @@ function xlua.usage(funcname, description, example, ...)
             key = key .. ' '
          end
          str = str .. key .. '-- ' .. param.help 
-         if param.default or param.default == false then
+         if type(param.default) == 'table' then
+            str = str .. '  [default = ' .. xlua.table2string(param.default) .. ']'
+         elseif param.default or param.default == false then
             str = str .. '  [default = ' .. tostring(param.default) .. ']'
          elseif param.defaulta then
             str = str .. '  [default == ' .. param.defaulta .. ']'
