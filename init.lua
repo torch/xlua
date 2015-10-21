@@ -109,9 +109,11 @@ rawset(_G, 'xprint', xlua.print)
 ----------------------------------------------------------------------
 -- log all session, by replicating stdout to a file
 ----------------------------------------------------------------------
-function xlua.log(file)
+function xlua.log(file, append)
    os.execute('mkdir ' .. (sys.uname() ~= 'windows' and '-p ' or '') .. ' "' .. sys.dirname(file) .. '"')
-   local f = assert(io.open(file,'w'))
+   local mode = 'w'
+   if append then mode = 'a' end
+   local f = assert(io.open(file,mode))
    io._write = io.write
    _G._print = _G.print
    _G.print = xlua.print
