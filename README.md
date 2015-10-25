@@ -1,5 +1,7 @@
 # A set of useful extensions to Lua
 
+[![Build Status](https://travis-ci.org/torch/xlua.svg)](https://travis-ci.org/torch/xlua)
+
 ## Dependencies:
 Torch7 (www.torch.ch)
 
