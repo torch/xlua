@@ -320,7 +320,7 @@ rawset(_G, 'xerror', xlua.error)
 -- provides standard try/catch functions
 --------------------------------------------------------------------------------
 function xlua.trycatch(try,catch)
-   local ok,err = pcall(func)
+   local ok,err = pcall(try)
    if not ok then catch(err) end
 end
 
