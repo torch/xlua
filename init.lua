@@ -236,7 +236,7 @@ do
    local timer
    local times
    local indices
-   local termLength = getTermLength()
+   local termLength = math.min(getTermLength(), 120)
    function xlua.progress(current, goal)
       -- defaults:
       local barLength = termLength - 34
