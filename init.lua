@@ -282,8 +282,13 @@ do
             indices = table.splice(indices)
             times = table.splice(times)
          end
-         tm = 'ETA: ' .. formatTime(remaining) .. ' | Step: ' .. formatTime(step)
-         io.write(tm)
+         -- Print remaining time when running or total time when done.
+         if (percent < barLength) then
+            io.write('ETA: ' .. formatTime(remaining))
+         else
+            io.write('Tot: ' .. formatTime(elapsed))
+         end
+         io.write(' | Step: ' .. formatTime(step))
          -- go back to center of bar, and print progress
          for i=1,6+#tm+barLength/2 do io.write('\b') end
          io.write(' ', current, '/', goal, ' ')
