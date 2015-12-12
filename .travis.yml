@@ -46,5 +46,5 @@ before_script:
 - cd $ROOT_TRAVIS_DIR
 - export LD_LIBRARY_PATH=${INSTALL_PREFIX}/lib:$LD_LIBRARY_PATH
 script: 
-- ${INSTALL_PREFIX}/bin/luarocks make
+- ${INSTALL_PREFIX}/bin/luarocks make xlua-1.1-0.rockspec
 - ${INSTALL_PREFIX}/bin/luajit -lxlua -e "print('xlua loaded succesfully')"
