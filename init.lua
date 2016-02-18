@@ -720,4 +720,34 @@ function string.tosymbol(str)
    end
 end
 
+
+--------------------------------------------------------------------------------
+-- parses arguments passed as ENV variables
+-- example: 
+-- learningRate=1e-3 nesterov=false th train.lua
+-- opt = xlua.envparams{learningRate=1e-2, nesterov=true}
+--------------------------------------------------------------------------------
+function xlua.envparams(default)
+    local params = {}
+    for k, v in pairs(default) do
+        params[k] = v
+        if os.getenv(k) ~= nil then
+            local v_new = os.getenv(k)
+            if type(v) == "number" then
+              v_new = tonumber(v_new)
+            end
+            if type(v) == "boolean" then
+              if v_new == "false" or v_new == "False" then
+                  v_new = false
+              elseif v_new == "true" or v_new == "True" then
+                  v_new = true
+              end
+            end
+            assert(v_new ~= nil)
+            params[k] = v_new
+        end
+    end
+    return params
+end
+
 return xlua
