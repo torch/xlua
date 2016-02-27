@@ -284,13 +284,14 @@ do
          end
          -- Print remaining time when running or total time when done.
          if (percent < barLength) then
-            io.write('ETA: ' .. formatTime(remaining))
+            tm = ' ETA: ' .. formatTime(remaining)
          else
-            io.write('Tot: ' .. formatTime(elapsed))
+            tm = ' Tot: ' .. formatTime(elapsed)
          end
-         io.write(' | Step: ' .. formatTime(step))
+         tm = tm .. ' | Step: ' .. formatTime(step)
+         io.write(tm)
          -- go back to center of bar, and print progress
-         for i=1,6+#tm+barLength/2 do io.write('\b') end
+         for i=1,5+#tm+barLength/2 do io.write('\b') end
          io.write(' ', current, '/', goal, ' ')
          -- reset for next bar
          if (percent == barLength) then
