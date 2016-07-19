@@ -72,6 +72,7 @@ function OptionParser:parse(options)
    options.__main__ = true -- python like main
 
    -- expand options (e.g. "--input=file" -> "--input", "file")
+   local unpack = unpack or table.unpack
    local arg = {unpack(arg)}
    for i=#arg,1,-1 do local v = arg[i]
       local flag, val = v:match('^(%-%-%w+)=(.*)')
