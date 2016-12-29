@@ -218,7 +218,7 @@ end
 local formatTime = xlua.formatTime
 
 ----------------------------------------------------------------------
--- progress bar
+-- progress bars
 ----------------------------------------------------------------------
 do
    local function getTermLength()
@@ -230,21 +230,55 @@ do
       else return 80 end 
    end
 
-   local barDone = true
-   local previous = -1
+   local barDoneList
+   local previousList
    local tm = ''
-   local timer
-   local times
-   local indices
+   local timerList
+   local timesList
+   local indicesList
+   local barsNumber
+
+   function xlua.resetProgress()
+     barDoneList = {true}
+     previousList = {-1}
+     timerList = {}
+     timesList = {}
+     indicesList = {}
+     barsNumber = 1
+     print('')
+   end
+   xlua.resetProgress()
+
    local termLength = math.min(getTermLength(), 120)
-   function xlua.progress(current, goal)
+   function xlua.progress(current, goal, index)
       -- defaults:
+      index = index or 1
       local barLength = termLength - 34
       local smoothing = 100 
       local maxfps = 10
-      
+      if index > barsNumber then
+        for i=barsNumber+1, index do
+            io.write('\n')
+            barDoneList[i] = true
+            previousList[i] = -1
+        end
+        io.flush()
+        barsNumber = index
+      elseif index < barsNumber then
+        --put cursor on the right line
+        io.write('\27['..barsNumber-index..'A')
+        io.flush()
+      end
+      --get progressBar variables
+      local previous = previousList[index]
+      local timer = timerList[index]
+      local times = timesList[index]
+      local indices = indicesList[index]
+      local barDone = barDoneList[index]
+
       -- Compute percentage
       local percent = math.floor(((current) * barLength) / goal)
+
 
       -- start new bar
       if (barDone and ((previous == -1) or (percent < previous))) then
@@ -296,12 +330,22 @@ do
          -- reset for next bar
          if (percent == barLength) then
             barDone = true
-            io.write('\n')
+            if barsNumber == 1 then
+               xlua.resetProgress()
+            end
          end
          -- flush
          io.write('\r')
+         io.write('\27['..barsNumber..'B')
          io.flush()
       end
+
+      --copy back variables in state tables
+      previousList[index] = previous
+      timerList[index] = timer
+      timesList[index] = times
+      indicesList[index] = indices
+      barDoneList[index] = barDone
    end
 end
 
