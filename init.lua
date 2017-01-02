@@ -218,7 +218,7 @@ end
 local formatTime = xlua.formatTime
 
 ----------------------------------------------------------------------
--- progress bars
+-- progress bars and logs
 ----------------------------------------------------------------------
 do
    local function getTermLength()
@@ -236,7 +236,7 @@ do
    local timerList
    local timesList
    local indicesList
-   local barsNumber
+   local linesNumber
 
    function xlua.resetProgress()
      barDoneList = {true}
@@ -244,7 +244,7 @@ do
      timerList = {}
      timesList = {}
      indicesList = {}
-     barsNumber = 1
+     linesNumber = 1
      print('')
    end
    xlua.resetProgress()
@@ -256,18 +256,18 @@ do
       local barLength = termLength - 34
       local smoothing = 100 
       local maxfps = 10
-      if index > barsNumber then
-        for i=barsNumber+1, index do
+      if barDoneList[index] == nil then
+         for i=linesNumber+1, index do
             io.write('\n')
-            barDoneList[i] = true
-            previousList[i] = -1
-        end
-        io.flush()
-        barsNumber = index
-      elseif index < barsNumber then
-        --put cursor on the right line
-        io.write('\27['..barsNumber-index..'A')
-        io.flush()
+         end
+         io.flush()
+         barDoneList[index] = true
+         previousList[index] = -1
+         linesNumber = math.max(linesNumber,index)
+      elseif index < linesNumber then
+         --put cursor on the right line
+         io.write('\27['..linesNumber-index..'A')
+         io.flush()
       end
       --get progressBar variables
       local previous = previousList[index]
@@ -330,13 +330,13 @@ do
          -- reset for next bar
          if (percent == barLength) then
             barDone = true
-            if barsNumber == 1 then
+            if linesNumber == 1 then
                xlua.resetProgress()
             end
          end
          -- flush
          io.write('\r')
-         io.write('\27['..barsNumber..'B')
+         io.write('\27['..linesNumber..'B')
          io.flush()
       end
 
@@ -346,6 +346,29 @@ do
       timesList[index] = times
       indicesList[index] = indices
       barDoneList[index] = barDone
+   end
+
+   function xlua.log(info,index)
+      if index > linesNumber then
+         for i=linesNumber+1, index do
+            io.write('\n')
+         end
+         linesNumber = index
+      elseif index < linesNumber then
+         --put cursor on the right line
+         io.write('\27['..linesNumber-index..'A')
+      end
+      io.flush()
+      if barDoneList[index] ~= nil then
+         --erase progress bar to avoid overlapping strings
+         io.write('\27[K')
+         io.flush()
+      end
+      io.write(' ')
+      io.write(info:sub(1,termLength)) --avoid info to take more than one line
+      io.write('\r')
+      io.write('\27['..linesNumber..'B')
+      io.flush()
    end
 end
 
