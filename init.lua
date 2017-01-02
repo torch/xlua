@@ -218,7 +218,7 @@ end
 local formatTime = xlua.formatTime
 
 ----------------------------------------------------------------------
--- progress bar
+-- progress bars and logs
 ----------------------------------------------------------------------
 do
    local function getTermLength()
@@ -230,21 +230,55 @@ do
       else return 80 end 
    end
 
-   local barDone = true
-   local previous = -1
+   local barDoneList
+   local previousList
    local tm = ''
-   local timer
-   local times
-   local indices
+   local timerList
+   local timesList
+   local indicesList
+   local linesNumber
+
+   function xlua.resetProgress()
+     barDoneList = {true}
+     previousList = {-1}
+     timerList = {}
+     timesList = {}
+     indicesList = {}
+     linesNumber = 1
+     print('')
+   end
+   xlua.resetProgress()
+
    local termLength = math.min(getTermLength(), 120)
-   function xlua.progress(current, goal)
+   function xlua.progress(current, goal, index)
       -- defaults:
+      index = index or 1
       local barLength = termLength - 34
       local smoothing = 100 
       local maxfps = 10
-      
+      if barDoneList[index] == nil then
+         for i=linesNumber+1, index do
+            io.write('\n')
+         end
+         io.flush()
+         barDoneList[index] = true
+         previousList[index] = -1
+         linesNumber = math.max(linesNumber,index)
+      elseif index < linesNumber then
+         --put cursor on the right line
+         io.write('\27['..linesNumber-index..'A')
+         io.flush()
+      end
+      --get progressBar variables
+      local previous = previousList[index]
+      local timer = timerList[index]
+      local times = timesList[index]
+      local indices = indicesList[index]
+      local barDone = barDoneList[index]
+
       -- Compute percentage
       local percent = math.floor(((current) * barLength) / goal)
+
 
       -- start new bar
       if (barDone and ((previous == -1) or (percent < previous))) then
@@ -296,12 +330,45 @@ do
          -- reset for next bar
          if (percent == barLength) then
             barDone = true
-            io.write('\n')
+            if linesNumber == 1 then
+               xlua.resetProgress()
+            end
          end
          -- flush
          io.write('\r')
+         io.write('\27['..linesNumber..'B')
          io.flush()
       end
+
+      --copy back variables in state tables
+      previousList[index] = previous
+      timerList[index] = timer
+      timesList[index] = times
+      indicesList[index] = indices
+      barDoneList[index] = barDone
+   end
+
+   function xlua.log(info,index)
+      if index > linesNumber then
+         for i=linesNumber+1, index do
+            io.write('\n')
+         end
+         linesNumber = index
+      elseif index < linesNumber then
+         --put cursor on the right line
+         io.write('\27['..linesNumber-index..'A')
+      end
+      io.flush()
+      if barDoneList[index] ~= nil then
+         --erase progress bar to avoid overlapping strings
+         io.write('\27[K')
+         io.flush()
+      end
+      io.write(' ')
+      io.write(info:sub(1,termLength)) --avoid info to take more than one line
+      io.write('\r')
+      io.write('\27['..linesNumber..'B')
+      io.flush()
    end
 end
 
