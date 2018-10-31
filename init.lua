@@ -237,9 +237,11 @@ do
    local times
    local indices
    local termLength = math.min(getTermLength(), 120)
-   function xlua.progress(current, goal)
+   function xlua.progress(current, goal, title)
+      -- sanity check
+      if title == nil then title = "" else title = tostring(title)..":" end
       -- defaults:
-      local barLength = termLength - 34
+      local barLength = termLength - 34 - #title
       local smoothing = 100 
       local maxfps = 10
       
@@ -262,7 +264,7 @@ do
       if (not barDone) then
          previous = percent
          -- print bar
-         io.write(' [')
+         io.write(title .. ' [')
          for i=1,barLength do
             if (i < percent) then io.write('=')
             elseif (i == percent) then io.write('>')
